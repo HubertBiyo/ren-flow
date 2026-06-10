@@ -1,0 +1,56 @@
+name: validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate manifest JSON
+        run: |
+          python3 -c "
+          import json
+          for p in ['.claude-plugin/marketplace.json', 'plugins/ren-flow/.claude-plugin/plugin.json']:
+              json.load(open(p, encoding='utf-8'))
+              print(f'OK  {p}')
+          "
+
+      - name: Check skill naming consistency (dir = frontmatter name = heading)
+        run: |
+          fail=0
+          for f in plugins/ren-flow/skills/*/SKILL.md; do
+            dir=$(basename "$(dirname "$f")")
+            name=$(grep -m1 '^name:' "$f" | sed 's/name:[[:space:]]*//' | tr -d '\r')
+            heading=$(grep -m1 '^# ' "$f" | sed 's/# //' | tr -d '\r')
+            if [ "$dir" != "$name" ] || [ "$dir" != "$heading" ]; then
+              echo "MISMATCH: dir=$dir name=$name heading=$heading"
+              fail=1
+            fi
+          done
+          [ $fail -eq 0 ] && echo "All skills consistent"
+          exit $fail
+
+      - name: Check frontmatter has description
+        run: |
+          fail=0
+          for f in plugins/ren-flow/skills/*/SKILL.md; do
+            grep -q '^description:' "$f" || { echo "MISSING description: $f"; fail=1; }
+          done
+          exit $fail
+
+      - name: Check SKILL.md line limit (≤300)
+        run: |
+          fail=0
+          for f in plugins/ren-flow/skills/*/SKILL.md; do
+            lines=$(wc -l < "$f")
+            if [ "$lines" -gt 300 ]; then
+              echo "TOO LONG ($lines lines): $f"
+              fail=1
+            fi
+          done
+          exit $fail
