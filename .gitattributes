@@ -1,0 +1,5 @@
+# 统一以 LF 入库,跨平台贡献不产生行尾假 diff
+* text=auto eol=lf
+*.ps1 text eol=lf
+*.png binary
+*.jpg binary

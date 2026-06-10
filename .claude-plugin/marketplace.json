@@ -1,0 +1,13 @@
+{
+  "name": "ren-flow",
+  "owner": {
+    "name": "HubertBiyo"
+  },
+  "plugins": [
+    {
+      "name": "ren-flow",
+      "source": "./plugins/ren-flow",
+      "description": "ren-flow 工作流技能集（16 个技能：立项 / 规格 / 实现 / 验收 / 修 bug / 重构 / 评审 / 沉淀 / 日志 / 收件箱等）"
+    }
+  ]
+}
